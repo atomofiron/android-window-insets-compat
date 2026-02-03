@@ -5,13 +5,14 @@
 package lib.atomofiron.insets
 
 import java.util.Objects
+import java.util.concurrent.atomic.AtomicInteger
 
 // WindowInsetsCompat.Type.SIZE = 9
-private var nextSeed = 1000 - 7
+private var nextSeed = AtomicInteger(1000 - 7)
 
 data class TypeSet internal constructor(
     val name: String,
-    internal val seed: Int = nextSeed++,
+    internal val seed: Int = nextSeed.incrementAndGet(),
     internal val next: TypeSet? = null,
     val animated: Boolean = next?.animated ?: false,
 ) : Set<TypeSet> {
