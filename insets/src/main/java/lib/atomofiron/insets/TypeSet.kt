@@ -18,24 +18,18 @@ data class TypeSet internal constructor(
 ) : Set<TypeSet> {
     companion object {
         internal const val FIRST_SEED = 1
-        internal val All = TypeSet("all", -1)
         val Empty = TypeSet("empty", 0)
     }
 
     override val size: Int = when {
         this === Empty -> 0
-        this === All -> -1
         next == null -> 1
         else -> next.size.inc()
     }
 
     override fun isEmpty(): Boolean = this === Empty
 
-    override operator fun contains(element: TypeSet): Boolean  = when {
-        this === All -> true
-        element === All -> false
-        else -> contains(element.seed)
-    }
+    override operator fun contains(element: TypeSet): Boolean = contains(element.seed)
 
     operator fun contains(seed: Int): Boolean = when {
         seed == this.seed -> true
@@ -70,8 +64,6 @@ data class TypeSet internal constructor(
         when {
             isEmpty() -> return other
             other.isEmpty() -> return this
-            this === All -> return All
-            other === All -> return All
         }
         var head = this
         var next: TypeSet? = other
@@ -87,17 +79,12 @@ data class TypeSet internal constructor(
     operator fun minus(other: TypeSet): TypeSet = when {
         isEmpty() -> Empty
         other.isEmpty() -> this
-        other === All -> Empty
-        // todo? TypeSet(inverted = true, next = other)
-        this === All -> throw UnsupportedOperationException("All minus ${other.joinToString { it.name }}")
         else -> operation(other, contains = false)
     }
 
     operator fun times(other: TypeSet): TypeSet = when {
         isEmpty() -> Empty
         other.isEmpty() -> Empty
-        this === All -> other
-        other === All -> this
         else -> operation(other, contains = true)
     }
 

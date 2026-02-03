@@ -87,8 +87,7 @@ class UnitTests {
             .set(CustomType.testType1, first)
             .set(CustomType.testType2, second)
             .build()
-        assertEquals(both, windowInsets[TypeSet.All])
-        assertEquals(both, windowInsets[TypeSet.All + CustomType.testType1])
+        assertEquals(both, windowInsets.all())
     }
 
     @Test

@@ -19,7 +19,7 @@ internal const val LEGACY_LIMIT = Int.SIZE_BITS - 2
 internal val LEGACY_RANGE = 1..LEGACY_LIMIT
 
 class ExtendedWindowInsets internal constructor(
-    insets: Map<Int, InsetsValue>,
+    internal val insets: Map<Int, InsetsValue>,
     private val hidden: TypeSet = TypeSet.Empty,
     val displayCutout: DisplayCutoutCompat?,
 ) {
@@ -71,13 +71,11 @@ class ExtendedWindowInsets internal constructor(
         fun define(name: String, animated: Boolean = false) = TypeSet(name, animated = animated).also { types.add(it) }
     }
 
-    internal val insets: Map<Int, InsetsValue> = insets.toMap()
-
     constructor(windowInsets: WindowInsets?, view: View? = null)
             : this(windowInsets?.let { WindowInsetsCompat.toWindowInsetsCompat(it, view) })
 
     constructor(windowInsets: WindowInsetsCompat? = null)
-            : this(windowInsets.getValues(), windowInsets.getHidden(), displayCutout = windowInsets?.displayCutout)
+            : this(windowInsets.getValues().toMap(), windowInsets.getHidden(), displayCutout = windowInsets?.displayCutout)
 
     @Deprecated("Compatibility with API of WindowInsets", replaceWith = ReplaceWith("get(type)"))
     fun getInsets(type: Int): Insets {
@@ -119,10 +117,9 @@ class ExtendedWindowInsets internal constructor(
         return Insets.of(values[0], values[1], values[2], values[3])
     }
 
-    operator fun get(types: TypeSet): Insets = when {
-        types === TypeSet.All -> insets.values.max()
-        else -> getIgnoringVisibility(types - hidden)
-    }
+    operator fun get(types: TypeSet): Insets = getIgnoringVisibility(types - hidden)
+
+    internal fun all(): Insets = insets.values.max()
 
     fun isEmpty(): Boolean = !isNotEmpty()
 
@@ -134,12 +131,11 @@ class ExtendedWindowInsets internal constructor(
 
     fun isVisible(types: TypeSet): Boolean = !hidden.contains(types)
 
-    @Suppress("SuspiciousEqualsCombination")
     override fun equals(other: Any?): Boolean = when {
         other === this -> true
         other !is ExtendedWindowInsets -> false
         other.hidden != hidden -> false
-        other.displayCutout !== displayCutout && other.displayCutout != displayCutout -> false
+        other.displayCutout != displayCutout -> false
         else -> other.insets == insets
     }
 
